@@ -2,8 +2,8 @@ FROM alpine:latest
 RUN apk add --no-cache bash curl cronie docker-cli
 
 # Kopiatu eta ziurtatu baimenak egokiak direla
-COPY crontab.txt /etc/crontabs/root
-RUN chmod 0644 /etc/crontabs/root
+COPY crontab.txt /crontab.txt
+COPY entrypoint.sh /usr/bin/entrypoint.sh
+RUN mkdir -p /root/.cache
 
-# Alpine-n crond zuzenean deitu dezakegu
-CMD ["crond", "-f"]
+ENTRYPOINT [ "/usr/bin/entrypoint.sh" ]
