@@ -1,1 +1,1 @@
-* * * * * echo "Defektuzko cron konfigurazioa erabiltzen zaude. Zure cron lanak ez dira exekutatuko." > /proc/1/fd/1 2>&1
+* * * * * echo "You are using the default cron configuration. Your cron jobs will not be executed." > /proc/1/fd/1 2>&1

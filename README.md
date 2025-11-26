@@ -1,33 +1,33 @@
 # docker-cron-image
 
-Docker irudi arin eta moldagarria, programatutako atazak (cron jobs) edukiontzi barruan exekutatzeko diseinatua.
+A lightweight and adaptable Docker image designed to run scheduled tasks (cron jobs) inside a container.
 
-Irudi hau **Alpine Linux**-en oinarrituta dago eta honako tresna hauek dakartza aurrez instalatuta, automatizazio script-ak errazteko:
-* `cronie` (Cron kudeatzailea)
-* `bash`
-* `curl`
-* `docker-cli` (Docker barruan beste Docker edukiontzi batzuk kudeatu ahal izateko)
+This image is based on **Alpine Linux** and comes with the following tools pre-installed to simplify automation scripts:
+*   `cronie` (Cron manager)
+*   `bash`
+*   `curl`
+*   `docker-cli` (To manage other Docker containers from within Docker)
 
-Besterik gabe exekutatzen bada, irudiak abisu-mezu bat bistaratuko du logetan minuturo, erabiltzaileari bere konfigurazio propioa muntatu behar duela gogorarazteko.
+If run without any configuration, the image will display a warning message in the logs every minute, reminding the user to mount their own configuration.
 
 ---
 
-## Erabilera gida
+## Usage Guide
 
-Irudi hau GitHub Container Registry-tik (GHCR) deskargatu dezakezu.
+You can download this image from the GitHub Container Registry (GHCR).
 
-### Bertsioen Nomenklatura (Tags)
+### Versioning Nomenclature (Tags)
 
-Irudiak honako *tag* egitura hau jarraitzen du bertsioak kudeatzeko:
+The image follows this *tag* structure for version management:
 
-* **`latest`**: Uneko bertsio egonkor eta berriena.
-* **`YYYYMMDD-sha`** (Adibidez: `20251126-a1b2c3d`): Data eta commit-aren hash-a barne hartzen dituen bertsio finkoa. Honek bermatzen du beti irudi berbera exekutatuko dela, nahiz eta `latest` eguneratu.
+*   **`latest`**: The current, most recent stable version.
+*   **`YYYYMMDD-sha`** (e.g., `20251126-a1b2c3d`): A fixed version that includes the date and commit hash. This ensures that you always run the same image, even if `latest` is updated.
 
-### Docker Compose Adibidea
+### Docker Compose Example
 
-Zure cron lanak exekutatzeko, **zure `crontab` fitxategia muntatu behar duzu** edukiontziaren `/etc/crontabs/root` bidean.
+To run your cron jobs, **you must mount your `crontab` file** to the `/etc/crontabs/root` path inside the container.
 
-Hona hemen `docker-compose.yml` fitxategi baten adibidea:
+Here is an example of a `docker-compose.yml` file:
 
 ```yaml
 version: '3.8'
@@ -35,13 +35,13 @@ version: '3.8'
 services:
   cron-worker:
     image: ghcr.io/codesyntax/docker-cron-image:latest
-    container_name: nire-cron-lana
+    container_name: my-cron-job
     restart: unless-stopped
     volumes:
-      # Zure cron lanak dituen fitxategia muntatu (overwrite)
-      - ./nire-crontab.txt:/etc/crontabs/root:ro
-      
-      # Docker socket-a muntatu (Docker komandoak erabili ahal izateko)
+      # Mount the file with your cron jobs (overwrite)
+      - ./my-crontab.txt:/crontab.txt:ro
+
+      # Mount the Docker socket (to use Docker commands)
       - /var/run/docker.sock:/var/run/docker.sock
 ```
 
