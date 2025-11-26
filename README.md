@@ -30,50 +30,45 @@ To run your cron jobs, **you must mount your `crontab` file** to the `/etc/cront
 Here is an example of a `docker-compose.yml` file:
 
 ```yaml
-version: '3.8'
-
 services:
   cron-worker:
     image: ghcr.io/codesyntax/docker-cron-image:latest
-    container_name: my-cron-job
+    container_name: cron-worker
     restart: unless-stopped
     volumes:
-      # Mount the file with your cron jobs (overwrite)
-      - ./my-crontab.txt:/crontab.txt:ro
-
-      # Mount the Docker socket (to use Docker commands)
+      - ./crontab.txt:/crontab.txt:ro
       - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-### ⚠️ Ohar garrantzitsuak konfigurazioari buruz
+### ⚠️ Important configuration notes
 
-Zure `crontab.txt` fitxategia sortzean, kontuan izan hiru puntu hauek:
+When creating your `crontab.txt` file, keep these three points in mind:
 
-1.  **Irteera desbideratu:** Docker-ek logak irakurri ahal izateko, komandoen irteera `/proc/1/fd/1`-era bideratu behar da.
-2.  **Lerro hutsa:** Fitxategiaren amaieran beti lerro huts bat utzi (bestela cron-ek ez du irakurriko).
-3.  **Docker Socket-a:** `docker-compose` fitxategian `/var/run/docker.sock` muntatzea ezinbestekoa da zure cron lanek `docker` komandoak exekutatu behar badituzte (adibidez: `docker restart nginx`). Honek edukiontziari baimena ematen dio "Host" makinako Docker motorra kontrolatzeko.
+1.  **Redirect output:** In order for Docker to read the logs, command output must be redirected to `/proc/1/fd/1`.
+2.  **Empty line:** Always leave an empty line at the end of the file (otherwise cron will not read it).
+3.  **Docker Socket:** Mounting `/var/run/docker.sock` in the `docker-compose` file is essential if your cron jobs need to execute `docker` commands (e.g., `docker restart nginx`). This grants the container permission to control the Host machine's Docker engine.
 
-Adibidea (`crontab.txt`):
+Example (`crontab.txt`):
 ```text
-# Adibidea: Nginx edukiontzia berrabiarazi egunero 03:00etan
-0 3 * * * docker restart nire-nginx > /proc/1/fd/1 2>&1
+# Example: Restart Nginx container every day at 03:00
+0 3 * * * docker restart my-nginx > /proc/1/fd/1 2>&1
 ```
 
-## Garapen gida
+## Development Guide
 
-Proiektu honek **CI/CD** (Continuous Integration / Continuous Deployment) sistema bat du integratuta GitHub Actions erabiliz.
+This project features an integrated **CI/CD** (Continuous Integration / Continuous Deployment) system using GitHub Actions.
 
-### GitHub Actions Workflow-a
+### GitHub Actions Workflow
 
-Errepositorioan aldaketak egiten diren bakoitzean, `.github/workflows/docker-publish.yml` fitxategian definitutako prozesua abiarazten da.
+Whenever changes are made to the repository, the process defined in the `.github/workflows/docker-publish.yml` file is triggered.
 
-Workflow honen urratsak honako hauek dira:
+The steps of this workflow are as follows:
 
-1.  **Aktibazioa:** `main` adarrera *push* bat egiten denean aktibatzen da automatikoki.
-2.  **Build:** Docker irudia eraikitzen du `Dockerfile` erabiliz.
-3.  **Tagging:** Irudiari bi etiketa jartzen dizkio:
+1.  **Trigger:** Automatically activated when a *push* is made to the `main` branch.
+2.  **Build:** Builds the Docker image using the `Dockerfile`.
+3.  **Tagging:** Applies two tags to the image:
     * `latest`
-    * Data eta commit hash-a daraman etiketa bakarra.
-4.  **Publish:** Irudia **GitHub Container Registry (GHCR)**-ra igotzen du.
+    * A unique tag containing the date and commit hash.
+4.  **Publish:** Uploads the image to the **GitHub Container Registry (GHCR)**.
 
-Ez da eskuzko `docker push` komandorik behar; kodea igotzearekin batera irudiaren bertsio berria eskuragarri egongo da minutu gutxiren buruan.
+No manual `docker push` command is required; simply pushing the code will make the new version of the image available within a few minutes.
