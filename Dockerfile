@@ -6,4 +6,4 @@ COPY crontab.txt /etc/crontabs/root
 RUN chmod 0644 /etc/crontabs/root
 
 # Alpine-n crond zuzenean deitu dezakegu
-CMD ["crond", "-f", "-l", "2"]
+CMD ["crond", "-f"]
