@@ -1,5 +1,6 @@
 FROM alpine:latest
-RUN apk add --no-cache bash curl cronie docker-cli
+RUN apk add --no-cache bash curl cronie docker-cli tzdata
+ENV TZ=Europe/Madrid
 
 # Copy and ensure correct permissions
 COPY crontab.txt /crontab.txt
